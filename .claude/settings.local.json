@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c \"import numpy; print\\('numpy:', numpy.__version__, numpy.__file__\\)\")",
+      "Bash(python -c \"import sklearn; print\\('sklearn:', sklearn.__version__, sklearn.__file__\\)\")",
+      "Bash(python -m venv venv)",
+      "Bash(venv/Scripts/python -m pip install --upgrade pip -q)",
+      "Bash(venv/Scripts/python --version)",
+      "Bash(venv/Scripts/pip --version)",
+      "Bash(venv/Scripts/pip install *)",
+      "Bash(venv/Scripts/pip list *)",
+      "Bash(venv/Scripts/python -c ' *)"
+    ]
+  }
+}

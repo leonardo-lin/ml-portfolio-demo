@@ -1,0 +1,43 @@
+# ============================================================
+# QLoRA Demo Site — Requirements
+# Install in ORDER (torch first, then bitsandbytes, then rest)
+# ============================================================
+
+# --- Step 1: PyTorch CUDA 12.1 (compatible with CUDA 12.5 driver) ---
+# Run separately:
+# pip install torch==2.3.1+cu121 torchvision==0.18.1+cu121 torchaudio==2.3.1+cu121 \
+#     --extra-index-url https://download.pytorch.org/whl/cu121
+
+# --- Step 2: bitsandbytes (Windows native DLL in v0.43.3+) ---
+bitsandbytes==0.43.3
+
+# --- Step 3: Core ML training stack ---
+transformers==4.44.2
+peft==0.12.0
+accelerate==0.34.2
+trl==0.10.1
+einops==0.8.0
+datasets==2.21.0
+
+# --- Step 4: RAG stack ---
+langchain==0.2.16
+langchain-community==0.2.16
+chromadb==0.5.5
+sentence-transformers==3.0.1
+
+# --- Step 5: Audio / Vision ---
+openai-whisper==20231117
+
+# --- Step 6: Web app & monitoring ---
+streamlit==1.38.0
+plotly==5.24.1
+pynvml==11.5.0
+psutil==5.9.8
+python-dotenv==1.0.1
+
+# --- Utilities ---
+numpy>=1.24.0
+pandas>=1.5.0
+networkx>=2.7.1
+Pillow>=9.0.0
+huggingface-hub>=0.24.0
