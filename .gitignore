@@ -1,0 +1,70 @@
+# ── Environment ───────────────────────────────────────────────────────────────
+.env
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+*.pyo
+
+# ── Model cache & weights ─────────────────────────────────────────────────────
+# HuggingFace cache (can be several GB) — note: ~/.cache is outside the repo;
+# this covers any local .cache/ folder accidentally created inside the project
+.cache/
+*.bin
+*.safetensors
+*.gguf
+*.ggml
+*.pt
+*.pth
+
+# Trained adapters (large binary files)
+adapters/
+# Uncomment below to track adapter configs but not weights:
+# !adapters/**/*.json
+
+# ── Training outputs ──────────────────────────────────────────────────────────
+runs/
+outputs/
+checkpoints/
+wandb/
+mlruns/
+lightning_logs/
+trainer_state.json
+training_args.bin
+optimizer.pt
+
+# ── ChromaDB vector store ─────────────────────────────────────────────────────
+data/chroma_db/
+
+# ── Precomputed data (regenerate with utils/generate_experiment_data.py) ──────
+# Comment out if you want to commit the generated JSON
+# data/precomputed/
+
+# ── Streamlit ─────────────────────────────────────────────────────────────────
+.streamlit/credentials.toml
+
+# ── OS ────────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── IDE ───────────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ── Python packaging & type checking ──────────────────────────────────────────
+dist/
+build/
+*.egg-info/
+.eggs/
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+
+# ── Logs & temp ───────────────────────────────────────────────────────────────
+*.log
+tmp/
+temp/
