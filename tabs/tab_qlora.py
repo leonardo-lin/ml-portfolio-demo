@@ -26,6 +26,16 @@ def render(model_manager=None, vram_monitor=None):
         st.info("Please install: `pip install torch transformers peft trl accelerate bitsandbytes`")
         st.code("venv\\Scripts\\pip install torch==2.3.1+cu121 --extra-index-url https://download.pytorch.org/whl/cu121\nvenv\\Scripts\\pip install bitsandbytes==0.43.3 transformers==4.44.2 peft==0.12.0 accelerate==0.34.2 trl==0.10.1", language="bash")
         return
+    # Demo Mode: show explanation instead of training UI
+    if st.session_state.get("demo_mode", False):
+        st.info(
+            "**Demo Mode is active.**\n\n"
+            "The **Experiment Results** tab already shows pre-loaded training results "
+            "for TinyLlama 1.1B QLoRA, including the live training curve.\n\n"
+            "To run real QLoRA training, disable Demo Mode in the sidebar."
+        )
+        return
+
     st.markdown(
         "Fine-tune a 4-bit quantized language model using QLoRA on your RTX 3050 (4GB VRAM). "
         "Training runs in a background thread — the chart updates live every 2 seconds."

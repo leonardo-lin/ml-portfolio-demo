@@ -16,7 +16,7 @@ except ImportError as _e:
     _DEPS_ERROR = str(_e)
 
 
-def render(rag_pipeline=None):
+def render(rag_pipeline=None, model_manager=None):
     st.header("Multimodal RAG Pipeline")
     if not _DEPS_OK:
         st.error(f"Missing dependency: `{_DEPS_ERROR}`")
@@ -137,7 +137,7 @@ def render(rag_pipeline=None):
             with col:
                 st.markdown(
                     f'<div style="background:{color};padding:8px;border-radius:6px;'
-                    f'text-align:center;font-size:12px">{step}</div>',
+                    f'text-align:center;font-size:12px;color:#ffffff">{step}</div>',
                     unsafe_allow_html=True
                 )
 
@@ -145,10 +145,32 @@ def render(rag_pipeline=None):
         with st.expander("Final Context (sent to LLM)"):
             st.text(result.final_context[:2000] + ("..." if len(result.final_context) > 2000 else ""))
 
-        st.info(
-            "To generate an actual LLM answer, load a model in **QLoRA Training** tab "
-            "and use the **ReAct Agent** tab for full pipeline."
-        )
+        if model_manager is not None and model_manager.is_loaded:
+            st.subheader("LLM Answer")
+            with st.spinner("Generating answer..."):
+                try:
+                    ctx = result.final_context[:1500]
+                    ans_prompt = (
+                        f"Based on the context below, answer the question concisely.\n\n"
+                        f"Context:\n{ctx}\n\n"
+                        f"Question: {question}"
+                    )
+                    answer, elapsed = model_manager.generate(
+                        ans_prompt, max_new_tokens=300, temperature=0.3
+                    )
+                    st.markdown(
+                        f'<div style="background:#003322;padding:16px;border-radius:8px;'
+                        f'border:2px solid #00d4ff;color:#ffffff">{answer}</div>',
+                        unsafe_allow_html=True,
+                    )
+                    st.caption(f"Generated in {elapsed:.1f}s")
+                except Exception as e:
+                    st.warning(f"LLM answer generation failed: {e}")
+        else:
+            st.info(
+                "To generate an actual LLM answer, load a model in **QLoRA Training** tab "
+                "or enable **Demo Mode** in the sidebar."
+            )
 
 
 def _process_and_index(rag_pipeline, uploaded_audio, uploaded_image, uploaded_text, use_default):

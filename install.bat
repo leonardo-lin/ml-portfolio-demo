@@ -1,4 +1,5 @@
 @echo off
+cd /d "%~dp0"
 echo ============================================================
 echo  QLoRA Demo Site - Installation Script
 echo  Run this from demo_site directory after activating venv

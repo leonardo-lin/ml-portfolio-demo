@@ -99,6 +99,15 @@ def generate():
         ]
     }
 
+    # ── F. Demo Training History (TinyLlama 1.1B QLoRA on RTX 3050) ─────────
+    # Gold line in loss chart: starts higher than 8B (smaller model capacity),
+    # converges faster (smaller model), ends above 8B final loss (capacity ceiling).
+    demo_loss = make_loss_curve(start=2.89, end=1.52, steps=500, decay=60, noise_std=0.09, seed=42)
+    demo_training_history = [
+        {"step": i, "loss": v, "vram_mb": 1750, "epoch": round(i / 500, 3)}
+        for i, v in enumerate(demo_loss)
+    ]
+
     # ── Combine all ──────────────────────────────────────────────────────────
     results = {
         "loss_curves": loss_data,
@@ -106,6 +115,7 @@ def generate():
         "quality_radar": radar_data,
         "perplexity": perplexity_data,
         "tradeoff": tradeoff_data,
+        "demo_training_history": demo_training_history,
         "metadata": {
             "generated": "2026-05-04",
             "sources": [

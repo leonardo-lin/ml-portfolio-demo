@@ -28,7 +28,8 @@ def render(model_manager=None):
         st.warning("Load a model in the **QLoRA Training** tab first.")
         return
 
-    if not adapter_trained:
+    is_demo = st.session_state.get("demo_mode", False)
+    if not adapter_trained and not is_demo:
         st.info("Train and save an adapter in the **QLoRA Training** tab to unlock this comparison.")
         st.markdown("You can still test the base model below:")
 
@@ -78,10 +79,11 @@ def render(model_manager=None):
         # -- Fine-tuned response --
         with col_ft:
             st.subheader("Fine-tuned Model")
-            if adapter_trained and adapter_path:
+            can_ft = (adapter_trained and adapter_path) or st.session_state.get("demo_mode", False)
+            if can_ft:
                 with st.spinner("Loading adapter & generating..."):
                     try:
-                        model_manager.load_with_adapter(adapter_path)
+                        model_manager.load_with_adapter(adapter_path or "demo")
                         response_ft, time_ft = model_manager.generate(
                             prompt, max_new_tokens=max_tokens
                         )

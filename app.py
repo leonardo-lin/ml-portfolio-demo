@@ -35,6 +35,7 @@ _DEFAULTS = {
     "rag_indexed": False,
     "qlora_trainer": None,
     "qlora_queue": None,
+    "demo_mode": False,
 }
 for k, v in _DEFAULTS.items():
     if k not in st.session_state:
@@ -71,6 +72,18 @@ def get_rag_pipeline():
 model_manager = get_model_manager()
 vram_monitor = get_vram_monitor()
 rag_pipeline = get_rag_pipeline()
+
+
+def _load_demo_training_history():
+    """Load demo_training_history from experiment_results.json for Demo Mode."""
+    import json
+    here = os.path.dirname(os.path.abspath(__file__))
+    path = os.path.join(here, "data", "precomputed", "experiment_results.json")
+    try:
+        with open(path, encoding="utf-8") as f:
+            return json.load(f).get("demo_training_history", [])
+    except Exception:
+        return []
 
 # ── Sidebar ──────────────────────────────────────────────────────────────────
 with st.sidebar:
@@ -134,6 +147,22 @@ with st.sidebar:
         st.caption(f"Adapter: {st.session_state.adapter_path}")
 
     st.divider()
+
+    # Demo Mode toggle (only shown when OPENAI_API_KEY is configured)
+    if os.environ.get("OPENAI_API_KEY"):
+        demo_on = st.toggle(
+            "🎯 Demo Mode (OpenAI)",
+            value=st.session_state.get("demo_mode", False),
+            help="Uses GPT-4o-mini instead of local model — no GPU required, instant responses.",
+        )
+        if demo_on != st.session_state.get("demo_mode", False):
+            st.session_state["demo_mode"] = demo_on
+            st.rerun()
+        if st.session_state.get("demo_mode"):
+            st.success("Demo Mode active")
+            st.caption("base: gpt-4o-mini · fine-tuned: gpt-4o-mini + instruction prompt")
+        st.divider()
+
     st.caption("Built with Streamlit + HuggingFace + PEFT + ChromaDB")
 
 # ── Main tabs ────────────────────────────────────────────────────────────────
@@ -147,21 +176,32 @@ tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
     "🛡️ Prompt Guard",
 ])
 
+# Route to OpenAI wrapper in Demo Mode, otherwise use local model manager
+if st.session_state.get("demo_mode") and os.environ.get("OPENAI_API_KEY"):
+    from core.openai_wrapper import OpenAIWrapper
+    active_manager = OpenAIWrapper()
+else:
+    active_manager = model_manager
+
+# Pre-fill training history in Demo Mode so Tab 5 gold line appears
+if st.session_state.get("demo_mode") and not st.session_state.get("training_history"):
+    st.session_state["training_history"] = _load_demo_training_history()
+
 with tab1:
     from tabs.tab_qlora import render as render_qlora
-    render_qlora(model_manager, vram_monitor)
+    render_qlora(active_manager, vram_monitor)
 
 with tab2:
     from tabs.tab_compare import render as render_compare
-    render_compare(model_manager)
+    render_compare(active_manager)
 
 with tab3:
     from tabs.tab_rag import render as render_rag
-    render_rag(rag_pipeline)
+    render_rag(rag_pipeline, model_manager=active_manager)
 
 with tab4:
     from tabs.tab_agent import render as render_agent
-    render_agent(model_manager, rag_pipeline)
+    render_agent(active_manager, rag_pipeline)
 
 with tab5:
     from tabs.tab_charts import render as render_charts

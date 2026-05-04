@@ -88,21 +88,21 @@ def _render_trace(trace: ReActTrace):
             # Thought
             st.markdown(
                 f'<div style="background:#1a2744;padding:10px;border-radius:6px;'
-                f'border-left:4px solid #00d4ff;margin-bottom:6px">'
+                f'border-left:4px solid #00d4ff;margin-bottom:6px;color:#ffffff">'
                 f'<b>Thought:</b> {step.thought}</div>',
                 unsafe_allow_html=True,
             )
             # Action
             st.markdown(
                 f'<div style="background:#2d1a00;padding:10px;border-radius:6px;'
-                f'border-left:4px solid #ff9500;margin-bottom:6px">'
+                f'border-left:4px solid #ff9500;margin-bottom:6px;color:#ffffff">'
                 f'<b>Action:</b> <code>{step.action}[{step.action_input}]</code></div>',
                 unsafe_allow_html=True,
             )
             # Observation
             st.markdown(
                 f'<div style="background:#1a2d1a;padding:10px;border-radius:6px;'
-                f'border-left:4px solid #4caf50;margin-bottom:10px">'
+                f'border-left:4px solid #4caf50;margin-bottom:10px;color:#ffffff">'
                 f'<b>Observation:</b> {step.observation[:500]}{"..." if len(step.observation) > 500 else ""}</div>',
                 unsafe_allow_html=True,
             )
@@ -111,7 +111,7 @@ def _render_trace(trace: ReActTrace):
     st.divider()
     st.markdown(
         f'<div style="background:#003322;padding:16px;border-radius:8px;'
-        f'border:2px solid #00d4ff">'
+        f'border:2px solid #00d4ff;color:#ffffff">'
         f'<b>Final Answer:</b><br><br>{trace.final_answer}</div>',
         unsafe_allow_html=True,
     )
