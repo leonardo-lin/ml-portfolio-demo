@@ -16,6 +16,15 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# Cloud detection: no CUDA + OPENAI_API_KEY present → interviewer demo environment
+try:
+    import torch as _torch
+    _CUDA_AVAILABLE = _torch.cuda.is_available()
+except ImportError:
+    _CUDA_AVAILABLE = False
+
+_IS_CLOUD = not _CUDA_AVAILABLE and bool(os.environ.get("OPENAI_API_KEY"))
+
 # ── Page config ──────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="QLoRA ML Demo",
@@ -35,7 +44,7 @@ _DEFAULTS = {
     "rag_indexed": False,
     "qlora_trainer": None,
     "qlora_queue": None,
-    "demo_mode": False,
+    "demo_mode": _IS_CLOUD,  # auto-enable on cloud
 }
 for k, v in _DEFAULTS.items():
     if k not in st.session_state:
@@ -133,11 +142,13 @@ with st.sidebar:
     st.divider()
 
     # Model status
-    if model_manager.is_loaded:
-        st.success(f"Model loaded")
+    if model_manager and model_manager.is_loaded:
+        st.success("Model loaded")
         footprint = model_manager.get_memory_footprint()
         if footprint > 0:
             st.caption(f"Footprint: {footprint / 1e6:.0f} MB (4-bit)")
+    elif _IS_CLOUD:
+        st.info("Cloud mode — GPU not available")
     else:
         st.info("No model loaded")
 
@@ -148,19 +159,25 @@ with st.sidebar:
 
     st.divider()
 
-    # Demo Mode toggle (only shown when OPENAI_API_KEY is configured)
+    # Demo Mode toggle
     if os.environ.get("OPENAI_API_KEY"):
-        demo_on = st.toggle(
-            "🎯 Demo Mode (OpenAI)",
-            value=st.session_state.get("demo_mode", False),
-            help="Uses GPT-4o-mini instead of local model — no GPU required, instant responses.",
-        )
-        if demo_on != st.session_state.get("demo_mode", False):
-            st.session_state["demo_mode"] = demo_on
-            st.rerun()
-        if st.session_state.get("demo_mode"):
-            st.success("Demo Mode active")
-            st.caption("base: gpt-4o-mini · fine-tuned: gpt-4o-mini + instruction prompt")
+        if _IS_CLOUD:
+            # On cloud: always on, no toggle needed
+            st.success("Demo Mode active (cloud)")
+            model_name = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
+            st.caption(f"Powered by {model_name}")
+        else:
+            demo_on = st.toggle(
+                "🎯 Demo Mode (OpenAI)",
+                value=st.session_state.get("demo_mode", False),
+                help="Uses GPT-4o-mini instead of local model — no GPU required, instant responses.",
+            )
+            if demo_on != st.session_state.get("demo_mode", False):
+                st.session_state["demo_mode"] = demo_on
+                st.rerun()
+            if st.session_state.get("demo_mode"):
+                st.success("Demo Mode active")
+                st.caption("base: gpt-4o-mini · fine-tuned: gpt-4o-mini + instruction prompt")
         st.divider()
 
     st.caption("Built with Streamlit + HuggingFace + PEFT + ChromaDB")
@@ -177,7 +194,7 @@ tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
 ])
 
 # Route to OpenAI wrapper in Demo Mode, otherwise use local model manager
-if st.session_state.get("demo_mode") and os.environ.get("OPENAI_API_KEY"):
+if (st.session_state.get("demo_mode") or _IS_CLOUD) and os.environ.get("OPENAI_API_KEY"):
     from core.openai_wrapper import OpenAIWrapper
     active_manager = OpenAIWrapper()
 else:

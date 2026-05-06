@@ -35,7 +35,7 @@ class OpenAIWrapper:
     def __init__(self) -> None:
         self._api_key: str = os.environ.get("OPENAI_API_KEY", "")
         self._mode: str = "base"
-        self.model_id: str = "gpt-4o-mini"
+        self.model_id: str = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
 
     # ── Core interface ────────────────────────────────────────────────────────
 
